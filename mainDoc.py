@@ -62,16 +62,16 @@ def convertToFraction(string):
         return fraction(float(string), 1)
     elif " " in string:
         separator = string.find(" ")
-        numberPart = string[:separator]
+        numberPart = float(string[:separator])
         fractionPart = string[separator + 1 :]
         separator = fractionPart.find("\\")
-        numerator = fractionPart[:separator]
-        denominator = fractionPart[separator + 1:]
+        numerator = float(fractionPart[:separator])
+        denominator = float(fractionPart[separator + 1:])
         return fraction(numerator + numerator * denominator, denominator)
     else:
         separator = string.find("\\")
-        numerator = string[:separator]
-        denominator = string[separator + 1:]
+        numerator = float(string[:separator])
+        denominator = float(string[separator + 1:])
         return fraction(numerator, denominator)
 
 
@@ -100,7 +100,7 @@ class fraction :
         elif simplified[1].numerator == 0 :
             return str(simplified[0])
         else:
-            return str(simplified[0]) + str(simplified[1].numerator) + "\\" + str(simplified[1].denominator)
+            return str(simplified[0]) + " " +  str(simplified[1].numerator) + "\\" + str(simplified[1].denominator)
     def __mul__(self , other) :
         product = fraction(self.numerator*other.numerator , self.denominator*other.denominator)
         return product
@@ -128,10 +128,10 @@ class fraction :
         if(self.numerator == 0):
             return fraction(0, 1)
         else:
-            leastCommonMultiple = lcm(self.numerator, self.denominator)
-            return fraction(self.numerator / leastCommonMultiple, self.denominator / leastCommonMultiple)
+            greatestCommonDemoniator = gcd(self.numerator, self.denominator)
+            return fraction(self.numerator / greatestCommonDemoniator, self.denominator / greatestCommonDemoniator)
     def simplifyToMixedNumber(self):
-        if self.numerator > self.denominator:
+        if self.numerator >= self.denominator:
             numberPart = int(self.numerator / self.denominator)
             remainder = self - fraction(numberPart, 1)
             return numberPart , remainder.simplify()
@@ -140,8 +140,10 @@ class fraction :
 
 
 def main():
+
+
     #expression = input("Please Enter An Expression: ")
-    expression = "1\\2 + 1\\2"
+    expression = "1\\2+1\\2+1\\2"
     fractionalized = fractionalize(expression)
     expressionAsString = fractionalized[0]
     fracList = fractionalized[1]
