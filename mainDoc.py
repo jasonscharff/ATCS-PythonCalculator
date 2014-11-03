@@ -33,7 +33,10 @@ def fractionalize(expression):
         if expression[x] == ")":
             alreadyConverted += expression[x]
         elif isOperand(expression[x]):
-            alreadyConverted += expression[x]
+            if (expression[x] == "^"):
+                alreadyConverted += "**"
+            else:
+                alreadyConverted += expression[x]
             while ( expression[x+1] == "(" or expression[x+1] == ")" ):
                 alreadyConverted += expression[x+1]
                 x+=1
