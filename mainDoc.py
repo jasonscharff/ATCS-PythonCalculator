@@ -141,7 +141,7 @@ class fraction :
 
 def main():
     #expression = input("Please Enter An Expression: ")
-    expression = "1+(2*5)"
+    expression = "1\\2 + 1\\2"
     fractionalized = fractionalize(expression)
     expressionAsString = fractionalized[0]
     fracList = fractionalized[1]
