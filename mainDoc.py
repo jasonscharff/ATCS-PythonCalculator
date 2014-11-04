@@ -10,6 +10,26 @@ def findSegmentEnd(string):
             return i
      return len(string)
 
+def followedByFraction(string):
+    terminators = '+-/*^() '
+    for i in range (0, len(string)):
+        if string[i] in terminators:
+            return False
+        elif string[i] == "\\":
+            return True
+    return False
+
+def removeSpaces(string):
+    newString = ""
+    for i in range (0, len(string)):
+        if string[i] != " ":
+            newString += string[i]
+        else:
+            if (followedByFraction(string[i+1:])):
+                newString += string[i]
+    return newString
+
+
 def fractionalize(expression):
     lastIndex = 0
     alreadyConverted = ""
@@ -58,10 +78,10 @@ def isNumber(string):
         return False
 
 def isFloat(string):
-    if string.find(".") == -1:
-        return False
-    else:
+    if "." in string:
         return True
+    else:
+        return False
 
 def convertToFraction(string):
     if isNumber(string):
@@ -201,17 +221,14 @@ class decimal (fraction):
 
 
 def main():
-    expression = input("Please Enter An Expression: ")
-    expression = "3/(2*0)"
+    #expression = input("Please Enter An Expression: ")
+    expression = ".5+1.25"
+    expression = removeSpaces(expression)
     fractionalized = fractionalize(expression)
     expressionAsString = fractionalized[0]
     fracList = fractionalized[1]
-    print(expressionAsString)
     return eval(expressionAsString)
 
 
 
-decimHalf = decimal(.5)
-decimQuarter = decimal(.25)
-fractionQuarter = fraction(1,4)
-print(eval("decimHalf + fractionQuarter"))
+print(main())
