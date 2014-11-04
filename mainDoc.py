@@ -57,9 +57,18 @@ def isNumber(string):
     except ValueError :
         return False
 
+def isFloat(string):
+    if string.find(".") == -1:
+        return False
+    else:
+        return True
+
 def convertToFraction(string):
     if isNumber(string):
-        return fraction(float(string), 1)
+        if(isFloat):
+            return decimal(float(string))
+        else:
+            return fraction(float(string), 1)
     elif " " in string:
         separator = string.find(" ")
         numberPart = float(string[:separator])
@@ -89,10 +98,12 @@ def lcm(a, b):
     return a * b / gcd(a,b)
 
 class fraction :
-    def __init__(self , numerator=0, denominator=1) :
-        self.numerator = numerator
-        self.denominator = denominator
+    def __init__(self , Numerator=0, Denominator=1) :
+        self.numerator = Numerator
+        self.denominator = Denominator
     def __str__(self) :
+        if(self.denominator == 0):
+            return "Please Do Not Divide By Zero"
         simplified = self.simplifyToMixedNumber()
         frac = simplified[1]
         if simplified[0] == 0:
@@ -119,7 +130,7 @@ class fraction :
         fracOne = fraction((self.numerator) * (leastCommonMultiple / (self.denominator)) , leastCommonMultiple)
         fracTwo = fraction((other.numerator) * (leastCommonMultiple / other.denominator), leastCommonMultiple)
         return fraction(fracOne.numerator + fracTwo.numerator , leastCommonMultiple)
-    def __div__(self, other):
+    def __truediv__(self, other):
         recip = fraction(other.denominator, other.numerator)
         return self * recip
     def __pow__ (self, power):
@@ -138,16 +149,69 @@ class fraction :
         return 0, self.simplify()
 
 
+def lenMantessa (number):
+        stringVersion = str(number)
+        indexOfDecimal = stringVersion.find(".")
+        return len(stringVersion[indexOfDecimal + 1:])
+
+class decimal (fraction):
+    def __init__(self, numerator=0):
+        length = lenMantessa(numerator)
+        newNumerator = numerator * 10 ** length
+        Denominator = 10 ** length
+        fraction.__init__(self, newNumerator, Denominator)
+    def __str__(self):
+        decimalValue = self.numerator / self.denominator
+        return str(decimalValue)
+    def __mul__(self, other):
+         if type(other) == type(fraction()):
+            return fraction.__mul__(self, other)
+         else:
+            fractionOne = float(self)
+            fractionTwo = float(other)
+            return fractionOne * fractionTwo
+    def __sub__(self, other):
+        if type(other) == type(fraction()):
+            return fraction.__sub__(self, other)
+        else:
+            fractionOne = float(self)
+            fractionTwo = float(other)
+            return fractionOne - fractionTwo
+    def __add__(self, other):
+        if type(other) == type(fraction()):
+            return fraction.__add__(self, other)
+        else:
+            fractionOne = float(self)
+            fractionTwo = float(other)
+            return fractionOne + fractionTwo
+    def __truediv__(self, other):
+        if type(other) == type(fraction()):
+            return fraction.__truediv__(self, other)
+        else:
+            fractionOne = float(self)
+            fractionTwo = float(other)
+            return fractionOne / fractionTwo
+    def __pow__(self, power):
+         if type(power) == type(fraction()):
+            return fraction.__pow__(self, power)
+         else:
+            fractionOne = float(self)
+            powerDecimal = float(power)
+            return fractionOne ** powerDecimal
+
 
 def main():
-
-
-    #expression = input("Please Enter An Expression: ")
-    expression = "1\\2+1\\2+1\\2"
+    expression = input("Please Enter An Expression: ")
+    expression = "3/(2*0)"
     fractionalized = fractionalize(expression)
     expressionAsString = fractionalized[0]
     fracList = fractionalized[1]
     print(expressionAsString)
     return eval(expressionAsString)
 
-print(main())
+
+
+decimHalf = decimal(.5)
+decimQuarter = decimal(.25)
+fractionQuarter = fraction(1,4)
+print(eval("decimHalf + fractionQuarter"))
