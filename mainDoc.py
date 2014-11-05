@@ -10,6 +10,19 @@ def findSegmentEnd(string):
             return i
      return len(string)
 
+def findSegmentEndWithSpaces(string):
+    terminators = '+-/*^() '
+    for i in range (0, len(string)):
+        if string[i] in terminators:
+            if(string[i] == " "):
+                if followedByFraction(string[i+1:]):
+                    return i
+            else:
+                return i
+
+    return len(string)
+
+
 def followedByFraction(string):
     terminators = '+-/*^() '
     for i in range (0, len(string)):
@@ -19,13 +32,38 @@ def followedByFraction(string):
             return True
     return False
 
+def fixNegatives(string):
+    newString = ""
+    forValue = 0
+    if string[0] == "-":
+        newString += "(0-"
+        indexOfNumberEnd = findSegmentEndWithSpaces(string[1:]) + 1
+        portion = string[1:indexOfNumberEnd]
+        newString += portion
+        newString += ")"
+        forValue = indexOfNumberEnd
+    while forValue < len(string) :
+        if (string[forValue] == " " or string[forValue] == "(") and string[forValue+1] == "-" and isNumber(string[forValue + 2]):
+            if(string[forValue] == "("):
+                newString += "("
+            indexOfTermEnd = findSegmentEndWithSpaces(string[forValue+2:]) + forValue + 2
+            term = string[forValue+2:indexOfTermEnd]
+            newString = newString +  "(0-" + term + ")"
+            forValue = indexOfTermEnd
+        else:
+            newString += string[forValue]
+            forValue += 1
+    return newString
+
+
+
 def removeSpaces(string):
     newString = ""
     for i in range (0, len(string)):
         if string[i] != " ":
             newString += string[i]
         else:
-            if (followedByFraction(string[i+1:])):
+            if (isOperand(string[i-1]) == False and followedByFraction(string[i+1:])):
                 newString += string[i]
     return newString
 
@@ -33,6 +71,7 @@ def removeSpaces(string):
 def fractionalize(expression):
     lastIndex = 0
     alreadyConverted = ""
+    segmentEnd = 0
     fracList = []
     #Append first
     indexOfFirstOperand = findNextOperand(expression)
@@ -96,7 +135,7 @@ def convertToFraction(string):
         separator = fractionPart.find("\\")
         numerator = float(fractionPart[:separator])
         denominator = float(fractionPart[separator + 1:])
-        return fraction(numerator + numerator * denominator, denominator)
+        return fraction(numerator + numberPart * denominator, denominator)
     else:
         separator = string.find("\\")
         numerator = float(string[:separator])
@@ -154,7 +193,10 @@ class fraction :
         recip = fraction(other.denominator, other.numerator)
         return self * recip
     def __pow__ (self, power):
-        return fraction(self.numerator ** power, self.denominator ** power)
+        if power >= 0:
+            return fraction(self.numerator ** power, self.denominator ** power)
+        else:
+            return fraction(1, 1) / fraction(self.numerator ** power, self.denominator ** power)
     def simplify(self):
         if(self.numerator == 0):
             return fraction(0, 1)
@@ -222,7 +264,9 @@ class decimal (fraction):
 
 def main():
     #expression = input("Please Enter An Expression: ")
-    expression = ".5+1.25"
+    expression = "3 - -5"
+    expression = fixNegatives(expression)
+    print(expression)
     expression = removeSpaces(expression)
     fractionalized = fractionalize(expression)
     expressionAsString = fractionalized[0]
@@ -232,3 +276,8 @@ def main():
 
 
 print(main())
+
+
+
+
+
