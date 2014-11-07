@@ -43,7 +43,7 @@ def fixNegatives(string):
         newString += ")"
         forValue = indexOfNumberEnd
     while forValue < len(string) :
-        if (string[forValue] == " " or string[forValue] == "(") and string[forValue+1] == "-" and isNumber(string[forValue + 2]):
+        if (string[forValue] == " " or string[forValue] == "(") and string[forValue+1] == "-" and (isNumber(string[forValue + 2]) or string[forValue+2] == "."):
             if(string[forValue] == "("):
                 newString += "("
             indexOfTermEnd = findSegmentEndWithSpaces(string[forValue+2:]) + forValue + 2
@@ -80,7 +80,7 @@ def fractionalize(expression):
         if subExpression[i] == "(" or subExpression[i] == ")":
             alreadyConverted += subExpression[i]
         else:
-            segmentEnd = findSegmentEnd(expression)
+            segmentEnd = findSegmentEnd(expression[i:]) + i
             firstTerm = subExpression[i:segmentEnd]
             fractionVersion = convertToFraction(firstTerm)
             fracList.append(fractionVersion)
@@ -149,6 +149,8 @@ def isOperand(char):
 
 
 def gcd (a , b) :
+    a = float(a)
+    b = float(b)
     if a == 0:
         return b
     else:
@@ -193,6 +195,8 @@ class fraction :
         recip = fraction(other.denominator, other.numerator)
         return self * recip
     def __pow__ (self, power):
+        if float(self) < 0 and float(power) % 2 == 0:
+            raise invalidRadical
         if power >= 0:
             return fraction(self.numerator ** power, self.denominator ** power)
         else:
@@ -220,8 +224,9 @@ class decimal (fraction):
     def __init__(self, numerator=0):
         length = lenMantessa(numerator)
         newNumerator = numerator * 10 ** length
-        Denominator = 10 ** length
-        fraction.__init__(self, newNumerator, Denominator)
+        denominator = 10 ** length
+        greatestCommonDemoniator = abs(gcd(newNumerator, denominator))
+        fraction.__init__(self, newNumerator / greatestCommonDemoniator, denominator / greatestCommonDemoniator)
     def __str__(self):
         decimalValue = self.numerator / self.denominator
         return str(decimalValue)
@@ -231,51 +236,74 @@ class decimal (fraction):
          else:
             fractionOne = float(self)
             fractionTwo = float(other)
-            return fractionOne * fractionTwo
+            return decimal(fractionOne * fractionTwo)
     def __sub__(self, other):
         if type(other) == type(fraction()):
             return fraction.__sub__(self, other)
         else:
             fractionOne = float(self)
             fractionTwo = float(other)
-            return fractionOne - fractionTwo
+            return decimal(fractionOne - fractionTwo)
     def __add__(self, other):
         if type(other) == type(fraction()):
             return fraction.__add__(self, other)
         else:
             fractionOne = float(self)
             fractionTwo = float(other)
-            return fractionOne + fractionTwo
+            return decimal(fractionOne + fractionTwo)
     def __truediv__(self, other):
         if type(other) == type(fraction()):
             return fraction.__truediv__(self, other)
         else:
             fractionOne = float(self)
             fractionTwo = float(other)
-            return fractionOne / fractionTwo
+            return decimal(fractionOne / fractionTwo)
     def __pow__(self, power):
          if type(power) == type(fraction()):
             return fraction.__pow__(self, power)
          else:
             fractionOne = float(self)
             powerDecimal = float(power)
-            return fractionOne ** powerDecimal
+            if decimal(power).denominator %2 == 0 and fractionOne < 0:
+                raise invalidRadical
+            else:
+                return decimal(fractionOne ** powerDecimal)
+
+
+class invalidRadical (Exception):
+    pass
 
 
 def main():
-    #expression = input("Please Enter An Expression: ")
-    expression = "3 - -5"
-    expression = fixNegatives(expression)
-    print(expression)
-    expression = removeSpaces(expression)
-    fractionalized = fractionalize(expression)
-    expressionAsString = fractionalized[0]
-    fracList = fractionalized[1]
-    return eval(expressionAsString)
+    print("At any point to end the session please enter \'done\'")
+    while True:
+        expression = input("Please Enter An Expression: ")
+        if expression != None and expression != "":
+            if(expression.lower() == "done"):
+                break
+            else:
+                expression = fixNegatives(expression)
+                expression = removeSpaces(expression)
+                fractionalized = fractionalize(expression)
+                expressionAsString = fractionalized[0]
+                fracList = fractionalized[1]
+                try:
+                    evaluate = eval(expressionAsString)
+                    print(evaluate)
+                except ZeroDivisionError:
+                    return "Please Don't Divide by Zero"
+                except invalidRadical:
+                    return "Invalid Radical"
+                except:
+                    return "Invalid Expression"
+        else:
+            print ("You didn't enter anything")
 
 
 
-print(main())
+#CHANGE ALL THINGS TO RETURN AN INSTANCE OF DECIMAL
+
+main()
 
 
 
