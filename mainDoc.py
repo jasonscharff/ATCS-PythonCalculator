@@ -197,10 +197,20 @@ class fraction :
     def __pow__ (self, power):
         if float(self) < 0 and float(power) % 2 == 0:
             raise invalidRadical
-        if power >= 0:
-            return fraction(self.numerator ** power, self.denominator ** power)
+        if float(power) >= 0:
+            partOne = fraction(self.numerator ** (1/power.denominator), self.denominator ** (1/power.denominator))
+            partTwo = fraction(partOne.numerator ** power.numerator, partOne.denominator ** power.numerator)
+            if(float.is_integer(partTwo.numerator) and float.is_integer(partTwo.numerator)):
+                return partTwo
+            else:
+                return decimal(float(partTwo))
+
         else:
-            return fraction(1, 1) / fraction(self.numerator ** power, self.denominator ** power)
+            power = abs(power)
+            partOne = fraction(self.numerator ** power.demoninator, self.denominator ** power.demoninator)
+            partTwo = fraction(partOne.numerator ** (1/power.numerator), partOne.demoniator ** (1/power.numerator))
+            return fraction.reciprocal(partTwo)
+
     def simplify(self):
         if(self.numerator == 0):
             return fraction(0, 1)
@@ -280,32 +290,32 @@ def main():
         expression = input("Please Enter An Expression: ")
         if expression != None and expression != "":
             if(expression.lower() == "done"):
+                print ("Session Concluded")
                 break
             else:
-                expression = fixNegatives(expression)
-                expression = removeSpaces(expression)
-                fractionalized = fractionalize(expression)
-                expressionAsString = fractionalized[0]
-                fracList = fractionalized[1]
+                try:
+                    expression = fixNegatives(expression)
+                    expression = removeSpaces(expression)
+                    fractionalized = fractionalize(expression)
+                    expressionAsString = fractionalized[0]
+                    fracList = fractionalized[1]
+                except:
+                    print ("The syntax behind your expression is invalid. Please refer to the Readme file.")
+                    continue
                 try:
                     evaluate = eval(expressionAsString)
                     print(evaluate)
                 except ZeroDivisionError:
-                    return "Please Don't Divide by Zero"
+                    print ("Please Don't Divide by Zero")
                 except invalidRadical:
-                    return "Invalid Radical"
-                except:
-                    return "Invalid Expression"
+                    print("Invalid Radical")
+                # except:
+                #     return print("Invalid Expression")
         else:
             print ("You didn't enter anything")
 
 
 
-#CHANGE ALL THINGS TO RETURN AN INSTANCE OF DECIMAL
 
 main()
-
-
-
-
 
