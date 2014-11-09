@@ -309,8 +309,8 @@ def main():
                     print ("Please Don't Divide by Zero")
                 except invalidRadical:
                     print("Invalid Radical")
-                # except:
-                #     return print("Invalid Expression")
+                except:
+                     print("Invalid Expression")
         else:
             print ("You didn't enter anything")
 
