@@ -1,3 +1,5 @@
+from __future__ import division
+
 def findNextOperand(string):
     for i in range (0, len(string)):
         if isOperand(string[i]):
@@ -285,12 +287,12 @@ class invalidRadical (Exception):
 
 
 def main():
-    print("At any point to end the session please enter \'done\'")
+    print "At any point to end the session please enter \'done\'"
     while True:
-        expression = input("Please Enter An Expression: ")
+        expression = raw_input("Please Enter An Expression: ")
         if expression != None and expression != "":
             if(expression.lower() == "done"):
-                print ("Session Concluded")
+                print "Session Concluded"
                 break
             else:
                 try:
@@ -300,19 +302,19 @@ def main():
                     expressionAsString = fractionalized[0]
                     fracList = fractionalized[1]
                 except:
-                    print ("The syntax behind your expression is invalid. Please refer to the Readme file.")
+                    print "The syntax behind your expression is invalid. Please refer to the Readme file."
                     continue
                 try:
                     evaluate = eval(expressionAsString)
-                    print(evaluate)
+                    print evaluate
                 except ZeroDivisionError:
-                    print ("Please Don't Divide by Zero")
+                    print "Please Don't Divide by Zero"
                 except invalidRadical:
-                    print("Invalid Radical")
-                # except:
-                #     return print("Invalid Expression")
+                    print "Invalid Radical"
+                except:
+                    print "Invalid Expression"
         else:
-            print ("You didn't enter anything")
+            print "You didn't enter anything"
 
 
 
