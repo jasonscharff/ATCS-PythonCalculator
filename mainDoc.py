@@ -1,15 +1,22 @@
+#This method goes through the string and returns the index of the nextOperand.
+#If there isn't another operand None is returned
 def findNextOperand(string):
     for i in range (0, len(string)):
         if isOperand(string[i]):
             return i
-
+#This method finds the end of a segment. A segment is defined as one number, fraction, or mixed number
+#so it just finds the index of the first segment breaker (anything in the string terminators). If one 
+#is not found the length of the string is returned.
 def findSegmentEnd(string):
      terminators = '+-/*^()'
      for i in range (0, len(string)):
          if string[i] in terminators:
             return i
      return len(string)
-
+#This finds the end of segment in a similar manor to findSegmentEnd, but it is used before spaces are removed
+#so spaces are considered a segment breaker. However, in a mixed number a space is mandatory so it determines
+#if the space is just part of a mixed number to prevent false positives. If there is no segment end in the string
+#the length of the string is returned.
 def findSegmentEndWithSpaces(string):
     terminators = '+-/*^() '
     for i in range (0, len(string)):
@@ -22,7 +29,8 @@ def findSegmentEndWithSpaces(string):
 
     return len(string)
 
-
+#This method determines if before the next operator or parentheses there is a \ indicating a fraction. 
+#This is used to ensure spaces are not removed that belong to a mixed number.
 def followedByFraction(string):
     terminators = '+-/*^() '
     for i in range (0, len(string)):
@@ -32,6 +40,8 @@ def followedByFraction(string):
             return True
     return False
 
+#This method goes through the string and converts all negatives into (0-negative) to make the string parsing
+#of converting into custom classes simpler.
 def fixNegatives(string):
     newString = ""
     forValue = 0
@@ -56,7 +66,8 @@ def fixNegatives(string):
     return newString
 
 
-
+#This method goes through the string and removes any spaces unless it is followed by a fraction and that spaces is necessary.
+#This is to make the string parsing of converting terms into a custom class simpler.
 def removeSpaces(string):
     newString = ""
     for i in range (0, len(string)):
@@ -67,7 +78,9 @@ def removeSpaces(string):
                 newString += string[i]
     return newString
 
-
+#This method goes through the entire expression and converts it into the form "fracList[0] operator fracList[1]...". This is so
+#eval can be called on the expression even though it has fractions and mixed numbers. It does this by building a new String keeping
+#operators, parentheses, and converting the terms into a custom class and appending it onto fracList.
 def fractionalize(expression):
     lastIndex = 0
     alreadyConverted = ""
@@ -108,7 +121,7 @@ def fractionalize(expression):
     return alreadyConverted, fracList
 
 
-
+#This method determines if something is a number. If it is, True is returned. If not, False is returned. This is used in ConvertToFraction
 def isNumber(string):
     try:
         float(string)
@@ -116,18 +129,12 @@ def isNumber(string):
     except ValueError :
         return False
 
-def isFloat(string):
-    if "." in string:
-        return True
-    else:
-        return False
 
+#This method takes a String and converts it into either a decimal or fraction. If the term is a mixed number
+#this method will convert that into an impromper fraction.
 def convertToFraction(string):
     if isNumber(string):
-        if(isFloat):
-            return decimal(float(string))
-        else:
-            return fraction(float(string), 1)
+    	return decimal(float(string))
     elif " " in string:
         separator = string.find(" ")
         numberPart = float(string[:separator])
@@ -142,12 +149,12 @@ def convertToFraction(string):
         denominator = float(string[separator + 1:])
         return fraction(numerator, denominator)
 
-
+#This method returns true if a character is an operator and false if it isn't
 def isOperand(char):
     operands = '+-/*^'
     return char in operands
 
-
+#This method uses Euclids algorithim to find the GCD of two numbers.
 def gcd (a , b) :
     a = float(a)
     b = float(b)
@@ -155,13 +162,26 @@ def gcd (a , b) :
         return b
     else:
         return gcd(b % a, a)
+
+#This method finds the least common multiple by multipling the two numbers together (guaranteed to be a multiple)
+#and dividing that product by the gcd.
 def lcm(a, b):
     return a * b / gcd(a,b)
 
+'''
+The fraction class is used to hold both mixed numbers and fractions. Mixed numbers are stored as impromper fractions.
+This class overides the standard operators, the toString method, the float method, and has a the helper methods simplifyToMixedNumber, 
+simplify, and reciprocal. 
+'''
 class fraction :
+	#The constructor just takes the given parameters (numerator and denominator) and
+	#sets the proper values within the class
     def __init__(self , Numerator=0, Denominator=1) :
         self.numerator = Numerator
         self.denominator = Denominator
+    #This method returns a string representation of the fraction. It first simpifies the fraction (part of simplifytoMixedNumber)
+    #and if possible converts it into a mixed number. It then returns the fraction in the form A B\C, but if A is 0 it just returns B\C
+    #and if B is 0 it just returns A.
     def __str__(self) :
         if(self.denominator == 0):
             return "Please Do Not Divide By Zero"
@@ -173,27 +193,37 @@ class fraction :
             return str(simplified[0])
         else:
             return str(simplified[0]) + " " +  str(simplified[1].numerator) + "\\" + str(simplified[1].denominator)
+    #This method returns a fraction of the product of the two given fractions.
     def __mul__(self , other) :
         product = fraction(self.numerator*other.numerator , self.denominator*other.denominator)
         return product
+    #This method gets a float aproximation of the fraction by dividing the numerator by the denominator.
     def __float__(self) :
         return float(self.numerator)/self.denominator
+    #This method gets the reciporcal by simplify flipping the numerator and denominator
     def reciprocal(self) :
         inverse = fraction(self.denominator , self.numerator)
         return inverse
+   	#This method subtracts two fractions by first putting them over a common denominator then subtracting. It returns
+   	#a fraction.
     def __sub__(self, other):
         leastCommonMultiple = lcm(self.denominator, other.denominator)
         fracOne = fraction((self.numerator) * (leastCommonMultiple / (self.denominator)) , leastCommonMultiple)
         fracTwo = fraction((other.numerator) * (leastCommonMultiple / other.denominator), leastCommonMultiple)
         return fraction(fracOne.numerator - fracTwo.numerator, leastCommonMultiple)
+    #This method adds two fractions by first putting them over a common denominator then adding. It returns
+   	#a fraction.
     def __add__ (self, other):
         leastCommonMultiple = lcm(self.denominator, other.denominator)
         fracOne = fraction((self.numerator) * (leastCommonMultiple / (self.denominator)) , leastCommonMultiple)
         fracTwo = fraction((other.numerator) * (leastCommonMultiple / other.denominator), leastCommonMultiple)
         return fraction(fracOne.numerator + fracTwo.numerator , leastCommonMultiple)
+    #This method divides two fractions by returning the product of the first fraction and the reciprocal of the second
     def __truediv__(self, other):
         recip = fraction(other.denominator, other.numerator)
         return self * recip
+    #This method handles fractional exponents. It first determines if the given radical is invalid throwing an invalidRadical exception.
+    #If not then it solves the fractional exponent. If the output is a decimal value it returns a decimal to make things clear for the user.
     def __pow__ (self, power):
         if float(self) < 0 and float(power) % 2 == 0:
             raise invalidRadical
@@ -204,19 +234,20 @@ class fraction :
                 return partTwo
             else:
                 return decimal(float(partTwo))
-
         else:
             power = abs(power)
             partOne = fraction(self.numerator ** power.demoninator, self.denominator ** power.demoninator)
             partTwo = fraction(partOne.numerator ** (1/power.numerator), partOne.demoniator ** (1/power.numerator))
             return fraction.reciprocal(partTwo)
-
+    #This method simplifies a fraction to the lowest possible numerator and denominator.
     def simplify(self):
         if(self.numerator == 0):
             return fraction(0, 1)
         else:
             greatestCommonDemoniator = gcd(self.numerator, self.denominator)
             return fraction(self.numerator / greatestCommonDemoniator, self.denominator / greatestCommonDemoniator)
+    #This method converts a fraction into a mixed number with the fraction portion in simplest terms. It returns
+    #a tuple of the preceeding number and the fraction.
     def simplifyToMixedNumber(self):
         if self.numerator >= self.denominator:
             numberPart = int(self.numerator / self.denominator)
@@ -224,22 +255,35 @@ class fraction :
             return numberPart , remainder.simplify()
         return 0, self.simplify()
 
-
+#This method takes in a number and finds the length of its mantessa by determining the length
+#of its string version after the period.
 def lenMantessa (number):
         stringVersion = str(number)
         indexOfDecimal = stringVersion.find(".")
         return len(stringVersion[indexOfDecimal + 1:])
-
+'''
+The custom class decimal inherits from fraction and is used for non-fraction/mixed number entries.
+The purpose of this is such that all decimals are compatible with fractions (so an error isn't called
+when doing an operation on a fraction and a decimal). As well because a custom class is used custome exceptions
+can be thrown such as the invalidRadical. 
+'''
 class decimal (fraction):
+	#The constructor in essence converts each decimal into a fraction that has a numerator and denominator. 
+	#However, by using a custom class instead of just making every decimal fraction the toString can output
+	#a more appropriate result. This method works by finding the length of the mantissa, multipling the decimal
+	# times 10 ^ (length of mantessa) and making the denominator 10 ^ length of the mantissa. The fraction is then simplified.
     def __init__(self, numerator=0):
         length = lenMantessa(numerator)
         newNumerator = numerator * 10 ** length
         denominator = 10 ** length
         greatestCommonDemoniator = abs(gcd(newNumerator, denominator))
         fraction.__init__(self, newNumerator / greatestCommonDemoniator, denominator / greatestCommonDemoniator)
+    #Two string method which just returns a string of the float value of each decimal.
     def __str__(self):
         decimalValue = self.numerator / self.denominator
         return str(decimalValue)
+    #If one of the items is a fraction it calls the fraction class's mulitplication method to correct typing errors and 
+    #provide the proper output, if not the float values of each decimal are multiplied together
     def __mul__(self, other):
          if type(other) == type(fraction()):
             return fraction.__mul__(self, other)
@@ -247,6 +291,8 @@ class decimal (fraction):
             fractionOne = float(self)
             fractionTwo = float(other)
             return decimal(fractionOne * fractionTwo)
+    #If one of the items is a fraction it calls the fraction class's subtractaction method to correct typing errors and 
+    #provide the proper output, if not the float values of each decimal are subtracted together
     def __sub__(self, other):
         if type(other) == type(fraction()):
             return fraction.__sub__(self, other)
@@ -254,6 +300,8 @@ class decimal (fraction):
             fractionOne = float(self)
             fractionTwo = float(other)
             return decimal(fractionOne - fractionTwo)
+    #If one of the items is a fraction it calls the fraction class's addition method to correct typing errors and 
+    #provide the proper output, if not the float values of each decimal are added together
     def __add__(self, other):
         if type(other) == type(fraction()):
             return fraction.__add__(self, other)
@@ -261,6 +309,8 @@ class decimal (fraction):
             fractionOne = float(self)
             fractionTwo = float(other)
             return decimal(fractionOne + fractionTwo)
+    #If one of the items is a fraction it calls the fraction class's division method to correct typing errors and 
+    #provide the proper output, if not the float values of each decimal are divided.
     def __truediv__(self, other):
         if type(other) == type(fraction()):
             return fraction.__truediv__(self, other)
@@ -268,6 +318,10 @@ class decimal (fraction):
             fractionOne = float(self)
             fractionTwo = float(other)
             return decimal(fractionOne / fractionTwo)
+    #If one of the items is a fraction it calls the fraction class's division method to correct typing errors and 
+    #provide the proper output, if not the method checks to see if there is an invalid radical and if there isn't
+    #takes float value of the number to power of the float value of the other. If there is an invalid radical
+    #an exception is thrown.
     def __pow__(self, power):
          if type(power) == type(fraction()):
             return fraction.__pow__(self, power)
@@ -280,10 +334,17 @@ class decimal (fraction):
                 return decimal(fractionOne ** powerDecimal)
 
 
+#If a radical is invalid such as -2 ^ 1\2 then this exception is thrown.
+#A custom exception is used to properly give an error message to the user.
 class invalidRadical (Exception):
     pass
 
-
+'''
+This method handles the entire programs control flow. It runs a loop that takes in inputs, readies them
+for evaluation, evaluates, then repeats. If an error arises then the method prints out an error messgae
+informing the user as to avoid any crashes. The main loop only concludes when the user enters
+the keyword 'done' (case insensitive)
+'''
 def main():
     print("At any point to end the session please enter \'done\'")
     while True:
@@ -316,6 +377,5 @@ def main():
 
 
 
-
-main()
+main() #Start program
 
