@@ -278,7 +278,7 @@ class decimal (fraction):
         denominator = 10 ** length
         greatestCommonDemoniator = abs(gcd(newNumerator, denominator))
         fraction.__init__(self, newNumerator / greatestCommonDemoniator, denominator / greatestCommonDemoniator)
-    #Two string method which just returns a string of the float value of each decimal.
+    #toString method which just returns a string of the float value of each decimal.
     def __str__(self):
         decimalValue = self.numerator / self.denominator
         return str(decimalValue)
